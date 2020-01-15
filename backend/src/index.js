@@ -1,5 +1,6 @@
 const express = require('express')
 const mongoose = require('mongoose')
+const cors = require('cors')
 const routes = require('./routes')
 
 const MONGO_URI = 'mongodb+srv://week10:week10@cca-dm9y5.mongodb.net/test?retryWrites=true&w=majority'
@@ -10,6 +11,7 @@ mongoose.connect(MONGO_URI, {
   useUnifiedTopology: true
 })
 
+app.use(cors({ origion: 'http://localhost:3001' }))
 app.use(express.json())
 app.use(routes)
 

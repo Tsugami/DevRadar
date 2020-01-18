@@ -5,6 +5,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import MapView, { Marker, Callout } from 'react-native-maps';
 
 import api from '../services/api';
+import { connect, disconnect, subscribeToNewDevs } from '../services/socket';
 
 function Main({ navigation }) {
 	const [techs, setTechs] = useState('');
@@ -36,17 +37,29 @@ function Main({ navigation }) {
 		loadInitialPosition()
 	}, []);
 
-	async function loadDevs() {
-		const { latitude, longitude } = currentRegion;
-		const response = await api.get('/search', {
-			params: {
-				latitude,
-				longitude,
-				techs
-			}
-		})
+	useEffect(() => {
+		subscribeToNewDevs(dev => setDevs([...devs, dev]))
+	}, [devs]);
 
-		setDevs(response.data)
+	async function setupWebsocket() {
+		const { latitude, longitude } = currentRegion
+		connect(latitude, longitude, techs)
+	}
+
+	async function loadDevs() {
+		if (currentRegion) {
+			const { latitude, longitude } = currentRegion;
+			const response = await api.get('/search', {
+				params: {
+					latitude,
+					longitude,
+					techs
+				}
+			})
+
+			setDevs(response.data)
+			setupWebsocket()
+		}
 	}
 
 	function handleRegionChanged(region) {
@@ -60,7 +73,7 @@ function Main({ navigation }) {
 
 	return (
 		<>
-			<MapView onRegionChangeComplete={handleRegionChanged} initialRegion={currentRegion} style={styles.map}>
+			<MapView compassStyle={styles.compass} onRegionChangeComplete={handleRegionChanged} initialRegion={currentRegion} style={styles.map}>
 				{devs.map(({ location: { _id, coordinates: [latitude, longitude] }, avatar_url, github_username, name, bio = '', techs }) => (
 					<Marker key={_id} coordinate={{ latitude, longitude }}>
 					<Image style={styles.avatar} source={{ uri: avatar_url }} />
@@ -161,7 +174,11 @@ const styles = StyleSheet.create({
 	justifyContent: 'center',
 	alignItems: 'center',
 	marginLeft: 15
-	}
+	},
+
+	compass: {
+    bottom: 20
+  }
 })
 
 export default Main;

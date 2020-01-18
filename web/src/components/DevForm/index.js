@@ -8,6 +8,7 @@ function DevForm ({ onSubmit }) {
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
 
+
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -37,8 +38,9 @@ function DevForm ({ onSubmit }) {
     setTechs('');
   }
 
+
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={e => handleSubmit(e)}>
       <div className="input-block">
         <label htmlFor="github_username">Usuário do Github</label>
         <input

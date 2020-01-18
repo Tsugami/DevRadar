@@ -1,1 +1,11 @@
+# dependencies
 *node_modules/
+
+# testing
+web/coverage
+
+# production
+web/build
+
+# misc
+.env
